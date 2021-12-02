@@ -7,14 +7,18 @@ fn main() {
         (split[0], split[1].parse::<i32>().unwrap())
     });
 
+    let mut aim = 0;
     let mut depth = 0;
     let mut hoz = 0;
 
     for (direction, distance) in instructions {
         match direction {
-            "forward" => hoz += distance,
-            "up" => depth -= distance,
-            "down" => depth += distance,
+            "forward" => {
+                hoz += distance;
+                depth += aim * distance;
+            }
+            "up" => aim -= distance,
+            "down" => aim += distance,
             _ => panic!("Unknown direction {}", direction),
         }
     }

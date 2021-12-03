@@ -2,40 +2,41 @@ use std::fs;
 
 fn main() {
     let input = fs::read_to_string("src/input.txt").unwrap();
-    let all_bits: Vec<_> = input
+    let input =
+        "00100\n11110\n10110\n10111\n10101\n01111\n00111\n11100\n10000\n11001\n00010\n01010";
+    let mut words: Vec<Vec<_>> = input
         .split('\n')
         .filter(|&line| line != "")
-        .map(|line| line.split("").filter(|&x| !x.is_empty()))
+        .map(|line| line.split("").filter(|&x| !x.is_empty()).collect())
         .collect();
-    let num_bits = all_bits.len();
 
-    let mut sums = Vec::new();
+    fn get_reading(most_common: bool, words: Vec<Vec<&str>>) {
+        let word_len = words[0].len();
 
-    for bits in all_bits {
-        for (index, bit) in bits.enumerate() {
-            if sums.len() <= index {
-                sums.push(bit.parse::<usize>().unwrap());
-            }
+        for col in 0..word_len {
+            let sum: f64 = words
+                .iter()
+                .map(|word| word[col])
+                .map(|bit| bit.parse::<f64>().unwrap())
+                .sum();
 
-            if bit == "1" {
-                sums[index] = sums[index] + 1;
-            }
+            let bit_to_match = if most_common {
+                if sum >= (words.len() as f64) / 2.0 {
+                    1
+                } else {
+                    0
+                }
+            } else {
+                if sum <= (words.len() as f64) / 2.0 {
+                    0
+                } else {
+                    1
+                }
+            };
+
+            println!("bit to match {:?}", bit_to_match)
         }
     }
 
-    let gamma = sums
-        .iter()
-        .map(|&s| if s > num_bits / 2 { "1" } else { "0" })
-        .fold(String::new(), |a, b| a + b);
-    let gamma = isize::from_str_radix(&gamma, 2).unwrap();
-
-    let epsilon = sums
-        .iter()
-        .map(|&s| if s > num_bits / 2 { "0" } else { "1" })
-        .fold(String::new(), |a, b| a + b);
-    let epsilon = isize::from_str_radix(&epsilon, 2).unwrap();
-
-    println!("{:?}", gamma);
-    println!("{:?}", epsilon);
-    println!("{:?}", gamma * epsilon);
+    get_reading(true, words);
 }

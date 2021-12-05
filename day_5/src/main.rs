@@ -29,8 +29,6 @@ fn main() {
     let mut overlaps = HashMap::new();
 
     for Line(start, end) in lines {
-        println!("start {:?}", start);
-        println!("end {:?}", end);
         let is_horizontal = start.0 == end.0;
         let is_vertical = start.1 == end.1;
 
@@ -38,8 +36,8 @@ fn main() {
             continue;
         }
 
-        for x in start.0..(end.0 + 1) {
-            for y in start.1..(end.1 + 1) {
+        for x in std::cmp::min(start.0, end.0)..(std::cmp::max(start.0, end.0) + 1) {
+            for y in std::cmp::min(start.1, end.1)..(std::cmp::max(start.1, end.1) + 1) {
                 let key = format!("{},{}", x, y);
                 overlaps.insert(key.clone(), overlaps.get(&key).unwrap_or(&0) + 1);
             }
@@ -49,13 +47,4 @@ fn main() {
     let result: i32 = overlaps.values().filter(|&&v| v > 1).map(|_| 1).sum();
 
     println!("{}", result);
-    // let lines = lines.map(||)
-    // parse lines to
-    // lines = Vec((start: (x:0,y:9), end: (x:5,y:9) ...)
-    // overlapping = Vec<Vec<>>, fill with 0
-    // for each line
-    //   for each point it overlaps
-    //     overlapping[x][y] += 1;
-    //
-    // result = overlapping.map(v => v.sum()).map(v => v.sum());
 }

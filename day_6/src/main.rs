@@ -1,22 +1,24 @@
 fn main() {
     let input = std::fs::read_to_string("src/input.txt").unwrap();
-    let mut fish_school: Vec<_> = input
-        .split(',')
-        .map(|age| age.parse::<i32>().unwrap())
-        .collect();
+    let fish_school = input.split(',').map(|age| age.parse::<u64>().unwrap());
 
-    for _ in 0..80 {
-        let mut new_fish = Vec::new();
-        for fish in fish_school.iter_mut() {
-            if *fish == 0 {
-                *fish = 6;
-                new_fish.push(8);
-            } else {
-                *fish -= 1;
-            }
+    let mut fish_map = vec![0; 9];
+
+    for fish in fish_school {
+        fish_map[fish as usize] += 1;
+    }
+
+    for day in 0..256 {
+        let mut new_fish = vec![0; 9];
+
+        new_fish[6] = fish_map[0];
+        new_fish[8] = fish_map[0];
+        for i in 1..9 {
+            new_fish[i - 1] = new_fish[i - 1] + fish_map[i];
         }
 
-        fish_school.append(&mut new_fish);
+        fish_map = new_fish;
     }
-    println!("{:?}", fish_school.len());
+
+    println!("fish sum {}", fish_map.iter().sum::<u64>())
 }

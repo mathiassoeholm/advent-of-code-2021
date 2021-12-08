@@ -7,72 +7,105 @@ fn main() {
 
     let mut count = 0;
     for (signal_pattern, output) in input {
-        let mut possibilities: Vec<Vec<char>> = (0..7)
-            .map(|_| vec!['a', 'b', 'c', 'd', 'e', 'f', 'g'])
-            .collect();
+        let signals: Vec<_> = signal_pattern.split(' ').collect();
+        let one = *signals.iter().find(|&s| s.len() == 2).unwrap();
+        let four = *signals.iter().find(|&s| s.len() == 4).unwrap();
+        let seven = *signals.iter().find(|&s| s.len() == 3).unwrap();
+        let eight = *signals.iter().find(|&s| s.len() == 7).unwrap();
 
-        fn assign_possibility(signal: &str, index: usize, possibilities: &mut Vec<Vec<char>>) {
-            possibilities[index] = possibilities[index]
-                .clone()
-                .into_iter()
-                .filter(|&c| signal.contains(c))
-                .collect();
-        }
+        let mut mapping = ['?'; 7];
 
-        fn prune_possibilities(possibilities: &mut Vec<Vec<char>>) {
-            for i in 0..7 {
-                possibilities[i] = possibilities[i]
-                    .iter()
-                    .filter(|&&c| {
-                        !possibilities
-                            .iter()
-                            .enumerate()
-                            .any(|(j, p)| j != i && p.len() == 1 && p[0] == c)
-                    })
-                    .map(|c| *c)
-                    .collect()
-            }
-        }
+        mapping[0] = seven.chars().find(|&c| !one.contains(c)).unwrap();
+        mapping[2] = one
+            .chars()
+            .find(|&c| signals.iter().filter(|s| s.contains(c)).count() == 8)
+            .unwrap();
+        mapping[5] = one
+            .chars()
+            .find(|&c| signals.iter().filter(|s| s.contains(c)).count() == 9)
+            .unwrap();
+        mapping[1] = four
+            .chars()
+            .filter(|&c| !one.contains(c))
+            .find(|&c| signals.iter().filter(|s| s.contains(c)).count() == 6)
+            .unwrap();
+        mapping[3] = four
+            .chars()
+            .find(|&c| !one.contains(c) && c != mapping[1])
+            .unwrap();
+        mapping[4] = eight
+            .chars()
+            .filter(|&c| !four.contains(c) || !seven.contains(c))
+            .find(|&c| signals.iter().filter(|s| s.contains(c)).count() == 4)
+            .unwrap();
+        mapping[6] = eight
+            .chars()
+            .filter(|&c| !four.contains(c) || !seven.contains(c))
+            .find(|&c| signals.iter().filter(|s| s.contains(c)).count() == 7)
+            .unwrap();
 
-        for signal in signal_pattern.split(' ') {
-            match signal.len() {
-                2 => {
-                    assign_possibility(signal, 2, &mut possibilities);
-                    assign_possibility(signal, 5, &mut possibilities);
-                }
-                3 => {
-                    assign_possibility(signal, 0, &mut possibilities);
-                    assign_possibility(signal, 2, &mut possibilities);
-                    assign_possibility(signal, 5, &mut possibilities);
-                }
-                4 => {
-                    assign_possibility(signal, 1, &mut possibilities);
-                    assign_possibility(signal, 3, &mut possibilities);
-                    assign_possibility(signal, 2, &mut possibilities);
-                    assign_possibility(signal, 5, &mut possibilities);
-                }
-
-                // 2 | 3 | 4 | 7 => count += 1,
-                _ => {}
-            }
-
-            prune_possibilities(&mut &mut possibilities);
-        }
-        // [0].possibilities = union of [0].possibilities and new
-
-        // After all possibilities assigned
-        // Repeat until know all:
-        // We are sure of some, remove those from possibilities of others
-
+        let mut number = String::new();
         for digit in output.split(' ') {
-            match digit.len() {
-                2 | 3 | 4 | 7 => count += 1,
-                _ => {}
+            if digit.len() == 2 {
+                number += "1";
+            } else if digit.len() == 5
+                && digit.contains(mapping[0])
+                && digit.contains(mapping[2])
+                && digit.contains(mapping[3])
+                && digit.contains(mapping[4])
+                && digit.contains(mapping[6])
+            {
+                number += "2";
+            } else if digit.len() == 5
+                && digit.contains(mapping[0])
+                && digit.contains(mapping[2])
+                && digit.contains(mapping[3])
+                && digit.contains(mapping[5])
+                && digit.contains(mapping[6])
+            {
+                number += "3";
+            } else if digit.len() == 4 {
+                number += "4";
+            } else if digit.len() == 5
+                && digit.contains(mapping[0])
+                && digit.contains(mapping[1])
+                && digit.contains(mapping[3])
+                && digit.contains(mapping[5])
+                && digit.contains(mapping[6])
+            {
+                number += "5";
+            } else if digit.len() == 6
+                && digit.contains(mapping[0])
+                && digit.contains(mapping[1])
+                && digit.contains(mapping[3])
+                && digit.contains(mapping[4])
+                && digit.contains(mapping[5])
+                && digit.contains(mapping[6])
+            {
+                number += "6";
+            } else if digit.len() == 3 {
+                number += "7";
+            } else if digit.len() == 7 {
+                number += "8";
+            } else if digit.len() == 6
+                && digit.contains(mapping[0])
+                && digit.contains(mapping[1])
+                && digit.contains(mapping[2])
+                && digit.contains(mapping[3])
+                && digit.contains(mapping[5])
+                && digit.contains(mapping[6])
+            {
+                number += "9";
+            } else {
+                number += "0";
             }
         }
+
+        count += number.parse::<i32>().unwrap();
+
         println!(
-            "possibilities {:?}, signal_pattern {:?}",
-            possibilities, signal_pattern
+            "mapping {:?}, signal_pattern {:?}, number {:?}",
+            mapping, signal_pattern, number
         );
     }
     println!("{}", count);

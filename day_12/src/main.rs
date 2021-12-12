@@ -38,8 +38,20 @@ fn main() {
         path: Vec<String>,
         connections: &HashMap<&str, Vec<String>>,
         path_count: &mut i32,
-    ) -> Node {
-        println!("id {:?}", identifier);
+    ) -> Option<Node> {
+        let there_are_duplicates = path.iter().any(|v| {
+            // v is lowercase and v is more than once in path
+            &v.to_lowercase() == v && path.iter().filter(|v2| v2 == &v).count() > 1
+        });
+
+        if there_are_duplicates
+            && identifier.to_lowercase() == identifier
+            && path.contains(&identifier)
+        {
+            return None;
+        }
+
+        // println!("id {:?}", identifier);
         let default = Vec::new();
         let children = connections.get(&identifier[..]).unwrap_or(&default);
         let children = if identifier == "end" {
@@ -52,8 +64,21 @@ fn main() {
                         true
                     } else if **id == "end" {
                         true
+                    } else if **id == "start" {
+                        false
                     } else {
-                        !path.iter().any(|s| s == *id)
+                        let does_not_exist_in_path = !path.iter().any(|s| s == *id);
+                        let there_are_no_duplicates = !path.iter().any(|v| {
+                            // v is lowercase and v is more than once in path
+                            &v.to_lowercase() == v && path.iter().filter(|v2| v2 == &v).count() > 1
+                        });
+
+                        // println!("🚧");
+                        // println!("{:?}", path.join("-"));
+                        // println!("does_not_exist_in_path {:?}", does_not_exist_in_path);
+                        // println!("there_are_no_duplicates {:?}", there_are_no_duplicates);
+
+                        does_not_exist_in_path || there_are_no_duplicates
                     }
                 })
                 .map(|id| {
@@ -61,6 +86,8 @@ fn main() {
                     path.push(identifier.clone());
                     str_to_node(id.clone(), path, connections, path_count)
                 })
+                .filter(|node| !node.is_none())
+                .map(|node| node.unwrap())
                 .collect()
         };
 
@@ -68,12 +95,15 @@ fn main() {
 
         if identifier == "end" {
             *path_count += 1;
+
+            // println!("{:?}", path.join("-"));
+            // println!("{:?}", path_count)
         }
 
-        Node {
+        Some(Node {
             identifier: identifier.to_owned(),
             children, // connections filter, if uppercase -> true, if end -> true, if lowercase, traverse parent to make sure it is not there
-        }
+        })
     }
 
     let tree = str_to_node(

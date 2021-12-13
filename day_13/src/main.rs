@@ -3,7 +3,7 @@ use std::collections::HashSet;
 fn main() {
     let input = std::fs::read_to_string("src/input.txt").unwrap();
     let mut split = input.split("\n\n");
-    let holes: HashSet<(_, _)> = split
+    let mut holes: HashSet<(_, _)> = split
         .next()
         .unwrap()
         .split('\n')
@@ -21,8 +21,29 @@ fn main() {
     });
 
     for (axis, val) in folds {
-        println!("{} {}", axis, val);
+        for (x, y) in holes.clone() {
+            if axis == "x" && x > val {
+                holes.remove(&(x, y));
+                holes.insert((val - (x - val), y));
+            } else if axis == "y" && y > val {
+                holes.remove(&(x, y));
+                holes.insert((x, val - (y - val)));
+            }
+        }
     }
 
-    println!("Hello, world! {:?}", holes);
+    let max_x = *holes.iter().map(|(x, y)| x).max().unwrap();
+    let max_y = *holes.iter().map(|(x, y)| y).max().unwrap();
+    for y in 0..(max_y + 1) {
+        for x in 0..(max_x + 1) {
+            if holes.contains(&(x, y)) {
+                print!("💩");
+            } else {
+                print!("🧻");
+            }
+        }
+        print!("\n");
+    }
+
+    println!("Hello, world! {:?}", holes.len());
 }

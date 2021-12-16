@@ -61,7 +61,49 @@ fn main() {
                 .sum::<usize>();
     }
 
-    println!("{}", get_version_sum(&packets));
+    fn evaluate_packet(packet: Packet) -> usize {
+        match packet.id {
+            0 => packet
+                .subPackets
+                .unwrap()
+                .iter()
+                .map(|p| evaluate_packet(p.clone()))
+                .sum(),
+            1 => packet
+                .subPackets
+                .unwrap()
+                .iter()
+                .map(|p| evaluate_packet(p.clone()))
+                .fold(1, |a, b| a * b),
+            2 => packet
+                .subPackets
+                .unwrap()
+                .iter()
+                .map(|p| evaluate_packet(p.clone()))
+                .min()
+                .unwrap(),
+            3 => packet
+                .subPackets
+                .unwrap()
+                .iter()
+                .map(|p| evaluate_packet(p.clone()))
+                .max()
+                .unwrap(),
+            4 => packet.value.unwrap() as usize,
+            5 => {
+                let sub_packets = packet.subPackets.unwrap();
+                if evaluate_packet(sub_packets[0].clone()) > evaluate_packet(sub_packets[1].clone())
+                {
+                    1
+                } else {
+                    0
+                }
+            }
+            _ => 0,
+        }
+    }
+
+    println!("{}", evaluate_packet(packets[0].clone()));
 }
 
 fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> (Vec<Packet>, usize) {

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, str::Chars};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Packet {
     version: u8,
     id: u8,
@@ -46,6 +46,22 @@ fn main() {
 
     let packets = parse_packets(&RefCell::new(bits), 1, ReadMode::Packet);
     println!("packets {:?}", packets);
+
+    fn get_version_sum(packets: &Vec<Packet>) -> usize {
+        return packets.iter().map(|p| p.version as usize).sum::<usize>()
+            + packets
+                .iter()
+                .map(|p| {
+                    if let Some(sub) = p.clone().subPackets {
+                        get_version_sum(&sub)
+                    } else {
+                        0
+                    }
+                })
+                .sum::<usize>();
+    }
+
+    println!("{}", get_version_sum(&packets));
 }
 
 fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<Packet> {

@@ -1,16 +1,17 @@
 use std::{cell::RefCell, str::Chars};
 
-enum ParseState {
-    ReadingVersion,
-    ReadingId,
-    Reading,
-}
-
+#[derive(Debug)]
 struct Packet {
     version: u8,
     id: u8,
     value: Option<u32>,
     subPackets: Option<Vec<Packet>>,
+}
+
+#[derive(PartialEq)]
+enum ReadMode {
+    Packet,
+    Bits,
 }
 
 // Packet { version, id, value?, subPackets? }
@@ -41,23 +42,25 @@ fn main() {
         })
         .collect::<Vec<&str>>()
         .join("");
-    let bits_to_read = bits.len() - (bits.len() % 4);
     let mut bits = bits.chars();
 
-    parse_packets(&mut bits, bits_to_read);
+    let packets = parse_packets(&RefCell::new(bits), 1, ReadMode::Packet);
+    println!("packets {:?}", packets);
 }
 
-fn parse_packets(bits: &mut Chars, bits_to_read: usize) -> Vec<Packet> {
+fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<Packet> {
     let bits_read = RefCell::new(0);
 
     let mut read_bit = || {
         *bits_read.borrow_mut() += 1;
-        bits.next().unwrap()
+        bits.borrow_mut().next().unwrap()
     };
-    // packets = []
+
     let mut packets = Vec::new();
     // while bits_read < bits_to_read {
-    while *bits_read.borrow() < bits_to_read {
+    while (mode == ReadMode::Packet && packets.len() < to_read)
+        || (mode == ReadMode::Bits && *bits_read.borrow() < to_read)
+    {
         let version = format!("{}{}{}", read_bit(), read_bit(), read_bit());
         let version = u8::from_str_radix(&version, 2).unwrap();
 
@@ -92,6 +95,24 @@ fn parse_packets(bits: &mut Chars, bits_to_read: usize) -> Vec<Packet> {
                 subPackets: None,
             });
         } else {
+            let length_type = read_bit();
+            let length_size = if length_type == '0' { 15 } else { 11 };
+            let mut length = "".to_owned();
+            for _ in 0..length_size {
+                length += &read_bit().to_string();
+            }
+            let length = usize::from_str_radix(&length, 2).unwrap();
+            let next_mode = if length_type == '0' {
+                ReadMode::Bits
+            } else {
+                ReadMode::Packet
+            };
+            packets.push(Packet {
+                version,
+                id,
+                value: None,
+                subPackets: Some(parse_packets(bits, length, next_mode)),
+            });
         }
         // else
         // subpackets = parse_packets(bits, bits_to_read: 32)

@@ -4,7 +4,7 @@ use std::{cell::RefCell, str::Chars};
 struct Packet {
     version: u8,
     id: u8,
-    value: Option<u32>,
+    value: Option<u64>,
     subPackets: Option<Vec<Packet>>,
 }
 
@@ -44,7 +44,7 @@ fn main() {
         .join("");
     let mut bits = bits.chars();
 
-    let packets = parse_packets(&RefCell::new(bits), 1, ReadMode::Packet);
+    let (packets, _) = parse_packets(&RefCell::new(bits), 1, ReadMode::Packet);
     println!("packets {:?}", packets);
 
     fn get_version_sum(packets: &Vec<Packet>) -> usize {
@@ -64,7 +64,7 @@ fn main() {
     println!("{}", get_version_sum(&packets));
 }
 
-fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<Packet> {
+fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> (Vec<Packet>, usize) {
     let bits_read = RefCell::new(0);
 
     let mut read_bit = || {
@@ -100,7 +100,7 @@ fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<P
             value += &read_bit().to_string();
             value += &read_bit().to_string();
 
-            let value = u32::from_str_radix(&value, 2).unwrap();
+            let value = u64::from_str_radix(&value, 2).unwrap();
 
             println!("Value is {}", value);
 
@@ -123,12 +123,18 @@ fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<P
             } else {
                 ReadMode::Packet
             };
+
+            let (sub, sub_bits_read) = parse_packets(bits, length, next_mode);
+
             packets.push(Packet {
                 version,
                 id,
                 value: None,
-                subPackets: Some(parse_packets(bits, length, next_mode)),
+                subPackets: Some(sub),
             });
+
+            *bits_read.borrow_mut() += sub_bits_read
+            // bits_read += how many bits did we read
         }
         // else
         // subpackets = parse_packets(bits, bits_to_read: 32)
@@ -140,6 +146,6 @@ fn parse_packets(bits: &RefCell<Chars>, to_read: usize, mode: ReadMode) -> Vec<P
     // return [Packet...]
     // else
     // subpackets = parse_packets()
-
-    packets
+    let temp = *bits_read.borrow();
+    (packets, temp)
 }

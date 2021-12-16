@@ -99,6 +99,25 @@ fn main() {
                     0
                 }
             }
+            6 => {
+                let sub_packets = packet.subPackets.unwrap();
+                if evaluate_packet(sub_packets[0].clone()) < evaluate_packet(sub_packets[1].clone())
+                {
+                    1
+                } else {
+                    0
+                }
+            }
+            7 => {
+                let sub_packets = packet.subPackets.unwrap();
+                if evaluate_packet(sub_packets[0].clone())
+                    == evaluate_packet(sub_packets[1].clone())
+                {
+                    1
+                } else {
+                    0
+                }
+            }
             _ => 0,
         }
     }

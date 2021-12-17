@@ -11,18 +11,14 @@ fn main() {
     let min_y = *&captures[3].parse::<i32>().unwrap();
     let max_y = *&captures[4].parse::<i32>().unwrap();
 
-    let mut y_attempts: Vec<_> = (0..500).collect();
+    let mut y_attempts: Vec<_> = (-500..500).collect();
     y_attempts.reverse();
+    let mut result = 0;
 
     for initial_y_velocity in y_attempts {
         let mut is_in_target_area = false;
 
         for initial_x_velocity in 1..(max_x + 1) {
-            // println!(
-            //     "Trying with new x {} y {}",
-            //     initial_x_velocity, initial_y_velocity
-            // );
-
             let mut did_overshoot = false;
             let mut did_undershoot = false;
 
@@ -46,24 +42,17 @@ fn main() {
                 is_in_target_area =
                     x_pos >= min_x && x_pos <= max_x && y_pos >= min_y && y_pos <= max_y;
 
-                if is_in_target_area {
-                    println!("y is {}", max_y_pos);
-                }
-
                 if is_in_target_area || did_overshoot || did_undershoot {
                     break;
                 }
             }
 
             if is_in_target_area {
-                break;
+                // println!("x {} y {}", initial_x_velocity, initial_y_velocity);
+                result += 1;
             }
-        }
-
-        if is_in_target_area {
-            break;
         }
     }
 
-    println!("Hello, world! {} {} {} {}", min_x, max_x, min_y, max_y);
+    println!("Hello, world! {} ", result);
 }

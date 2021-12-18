@@ -7,19 +7,6 @@ interface SnailNode {
   value?: number;
 }
 
-const temp = parseSnailNumber("[[1,2],[5,2],[3,4]]");
-let testSnailNumber = "[[[[0,7],4],[15,[0,13]]],[1,1]]";
-
-const tree = parseSnailNumber(testSnailNumber);
-const nodeToExplode = getPairToExplode(tree, 0);
-const nodeToSplit = getNodeToSplit(tree);
-const leftNode = findNodeInDirection(nodeToSplit!, "right");
-const leftLeftNode = findNodeInDirection(leftNode!, "right");
-const leftLeftLeftNode = findNodeInDirection(leftLeftNode!, "left");
-const leftLeftLeftLeftNode = findNodeInDirection(leftLeftLeftNode!, "left");
-
-explodePair(temp.children[1]);
-
 const input = fs.readFileSync(path.join(__dirname, "./input.txt"), "utf-8");
 
 const numbers = input.split("\n").map(parseSnailNumber);
@@ -27,8 +14,6 @@ const result = numbers.slice(1).reduce(addNumbers, numbers[0]);
 
 console.log(convertToString(result));
 console.log(getMagnitude(result));
-
-// console.log(getMagnitude(parseSnailNumber("[[9,1],[1,9]]")));
 
 function getMagnitude(tree: SnailNode): number {
   if (tree.children.length === 0) {

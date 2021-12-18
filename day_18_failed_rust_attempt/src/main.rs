@@ -24,18 +24,18 @@ struct Node {
     parent: Option<Box<Node>>,
     children: Vec<Box<Node>>,
     value: Option<usize>,
-};
+}
 
 fn parse_snail_number(input: &str) {
     let regex = Regex::new(r"(\[|\]|\d+|,\[|,)").unwrap();
 
-    let current_node = None; 
+    let current_node: Option<RefCell<Node>> = None;
 
     for cap in regex.captures_iter(input) {
         match &cap[0] {
             "[" => {
                 let parent = match current_node {
-                    Some(node) => Some(Box::new(node)),
+                    Some(node) => Some(Box::new(*node.borrow())),
                     None => None,
                 };
 
@@ -49,11 +49,11 @@ fn parse_snail_number(input: &str) {
                     (*node).children.push(Box::new(*new_node))
                 }
 
-                current_node = Some(*new_node);
+                current_node = Some(RefCell::new(*new_node));
             }
             "]" => {
                 current_node = match current_node {
-                    Some(node) => Some(*node.parent.unwrap()),
+                    Some(node) => Some(RefCell::new(*node.borrow().parent.unwrap())),
                     None => None,
                 }
             }
@@ -61,6 +61,21 @@ fn parse_snail_number(input: &str) {
                 // newNode = Node {}
                 // currentNode.parent.children.push(newNode)
                 // currentNode = newNode
+                let new_node = Box::new(Node {
+                    parent: current_node.unwrap().borrow().parent,
+                    children: Vec::new(),
+                    value: None,
+                });
+
+                current_node
+                    .unwrap()
+                    .borrow()
+                    .parent
+                    .unwrap()
+                    .children
+                    .push(new_node);
+
+                current_node = Some(RefCell::new(*new_node));
             }
             number => {
                 // currentNode.value = number.parse

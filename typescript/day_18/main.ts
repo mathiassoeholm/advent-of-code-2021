@@ -9,11 +9,36 @@ interface SnailNode {
 
 const input = fs.readFileSync(path.join(__dirname, "./input.txt"), "utf-8");
 
-const numbers = input.split("\n").map(parseSnailNumber);
-const result = numbers.slice(1).reduce(addNumbers, numbers[0]);
+const numbers = input.split("\n");
+let largestMagnitude = -Infinity;
 
-console.log(convertToString(result));
-console.log(getMagnitude(result));
+for (let i = 0; i < numbers.length; i++) {
+  for (let j = 0; j < numbers.length; j++) {
+    if (i !== j) {
+      const a = parseSnailNumber(numbers[i]);
+      const b = parseSnailNumber(numbers[j]);
+      const sum = addNumbers(a, b);
+      const magnitude = getMagnitude(sum);
+
+      largestMagnitude = Math.max(magnitude, largestMagnitude);
+    }
+  }
+}
+
+for (let i = 0; i < numbers.length; i++) {
+  for (let j = 0; j < numbers.length; j++) {
+    if (i !== j) {
+      const a = parseSnailNumber(numbers[j]);
+      const b = parseSnailNumber(numbers[i]);
+      const sum = addNumbers(a, b);
+      const magnitude = getMagnitude(sum);
+
+      largestMagnitude = Math.max(magnitude, largestMagnitude);
+    }
+  }
+}
+
+console.log("Largest magnitude", largestMagnitude);
 
 function getMagnitude(tree: SnailNode): number {
   if (tree.children.length === 0) {

@@ -27,8 +27,17 @@ export function getAllOrientationsForList(
 }
 
 export function solveChallenge(input: string) {
-  console.log("hello");
-  // input = read file
+  const beacons = input.split("\n\n").map((text) =>
+    text
+      .split("\n")
+      .slice(1)
+      .map((line) => line.split(",").map((str) => parseInt(str)))
+  );
+
+  const absoluteBeacons = new Set(beacons[0]);
+  const relativeBeacons = beacons.slice(1);
+
+  console.log(beacons);
   // const absoluteBeacons = new Set with all beacons from scanner 0
   // const relativeBeacons = [scanner][beacon]
   //

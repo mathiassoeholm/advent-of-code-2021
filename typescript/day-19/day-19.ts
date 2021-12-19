@@ -26,7 +26,8 @@ export function getAllOrientationsForList(
   return positions.map((p) => getAllOrientations(p[0], p[1], p[2]));
 }
 
-function solveChallenge() {
+export function solveChallenge(input: string) {
+  console.log("hello");
   // input = read file
   // const absoluteBeacons = new Set with all beacons from scanner 0
   // const relativeBeacons = [scanner][beacon]

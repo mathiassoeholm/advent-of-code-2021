@@ -1,4 +1,9 @@
-import { getAllOrientations, getAllOrientationsForList } from "./day-19";
+import {
+  getAllOrientations,
+  getAllOrientationsForList,
+  solveChallenge,
+} from "./day-19";
+import { exampleInput } from "./example-input";
 
 describe("day 19", () => {
   it("can get different orientations for a single position", () => {
@@ -31,5 +36,10 @@ describe("day 19", () => {
         ]),
       ])
     );
+  });
+
+  it("returns same result as example", () => {
+    const result = solveChallenge(exampleInput);
+    expect(result).toBe(79);
   });
 });

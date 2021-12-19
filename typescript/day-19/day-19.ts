@@ -1,3 +1,6 @@
+import path from "path";
+import fs from "fs";
+
 export type Position = [x: number, y: number, z: number];
 
 export function getAllOrientations(
@@ -50,10 +53,10 @@ export function solveChallenge(input: string) {
 
   const absoluteBeacons = beacons[0];
   const relativeBeacons = beacons.slice(1);
+  const scannerPositions = [[0, 0, 0]];
 
   for (let i = 0; i < 3; i++) {
     for (const beaconList of relativeBeacons) {
-      console.log("Checking");
       let continueToNextScanner = false;
       const orientations = getAllOrientationsForList(beaconList);
       for (const orientedbeaconList of orientations) {
@@ -77,12 +80,21 @@ export function solveChallenge(input: string) {
               )
             );
             if (beaconsInCommon.length >= 12) {
+              if (
+                !scannerPositions.some(
+                  (p) =>
+                    p[0] === offset[0] &&
+                    p[1] === offset[1] &&
+                    p[2] === offset[2]
+                )
+              ) {
+                scannerPositions.push(offset);
+              }
               orientedBeaconListWithOffset
                 .filter((b) => !beaconsInCommon.includes(b))
                 .forEach((p) => {
                   absoluteBeacons.push(p as Position);
                 });
-              console.log("win!");
               continueToNextScanner = true;
             }
             if (continueToNextScanner) {
@@ -100,7 +112,18 @@ export function solveChallenge(input: string) {
     }
   }
 
-  console.log(absoluteBeacons);
+  let largestDistance = -Infinity;
+  for (const [x1, y1, z1] of scannerPositions) {
+    for (const [x2, y2, z2] of scannerPositions) {
+      const distance =
+        Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(z1 - z2);
+      if (distance > largestDistance) {
+        largestDistance = distance;
+      }
+    }
+  }
+  console.log(largestDistance);
+
   // const absoluteBeacons = new Set with all beacons from scanner 0
   // const relativeBeacons = [scanner][beacon]
   //
@@ -133,3 +156,6 @@ export function solveChallenge(input: string) {
 //            save in scannersRelativeTo0
 //            remove from restScanners
 //
+
+const input = fs.readFileSync(path.join(__dirname, "input.txt"), "utf-8");
+solveChallenge(input);

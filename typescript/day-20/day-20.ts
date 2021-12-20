@@ -6,13 +6,13 @@ export function parseInput(input: string) {
   };
 }
 
-export function padImage(image: string[]) {
+export function padImage(image: string[], size = 2, padChar = ".") {
   return [
-    ".".repeat(image.length + 4),
-    ".".repeat(image.length + 4),
-    ...image.map((row) => `..${row}..`),
-    ".".repeat(image.length + 4),
-    ".".repeat(image.length + 4),
+    ...Array(size).fill(padChar.repeat(image.length + size * 2)),
+    ...image.map(
+      (row) => `${padChar.repeat(size)}${row}${padChar.repeat(size)}`
+    ),
+    ...Array(size).fill(padChar.repeat(image.length + size * 2)),
   ];
 }
 
@@ -40,26 +40,35 @@ export function convertPixelsToNumber(pixels: string) {
   return parseInt(binaryString, 2);
 }
 
-export function solveChallenge(input: string) {
+export function solveChallenge(input: string, iterations: number) {
   let { decoder, image } = parseInput(input);
-  for (let i = 0; i < 2; i++) {
-    image = padImage(image);
+  let padChar = ".";
+  for (let i = 0; i < iterations; i++) {
+    const paddingSize = 2;
+    image = padImage(image, paddingSize, padChar);
     image = decode(image, decoder);
-    printImage(image);
+    padChar = image[0][0];
   }
 
   const litPixels = image
     .join("")
     .split("")
-    .filter((c) => c !== ".").length;
-  console.log("lit pixels", litPixels);
+    .filter((c) => c === "#").length;
+  return litPixels;
 }
 
 export function decode(image: string[], decoder: string[]) {
   let result = image.map(() => "");
   for (let y = 0; y < image.length; y++) {
     for (let x = 0; x < image[y].length; x++) {
-      const sorrounding = selectSorrounding(image, x, y);
+      const isAtEdge =
+        x === 0 ||
+        y === 0 ||
+        x === image[y].length - 1 ||
+        y === image.length - 1;
+      const sorrounding = isAtEdge
+        ? image[1][1].repeat(9)
+        : selectSorrounding(image, x, y);
       const num = convertPixelsToNumber(sorrounding);
       const symbol = decoder[num];
       result[y] += symbol;

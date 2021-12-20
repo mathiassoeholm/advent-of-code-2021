@@ -45,8 +45,18 @@ describe("day 20", () => {
     expect(num).toBe(34);
   });
 
+  it("works with example-input.txt", () => {
+    const input = fs.readFileSync(
+      path.join(__dirname, "example-input.txt"),
+      "utf-8"
+    );
+    const result = solveChallenge(input, 50);
+    expect(result).toBe(3351);
+  });
+
   it("works with input.txt", () => {
     const input = fs.readFileSync(path.join(__dirname, "input.txt"), "utf-8");
-    const result = solveChallenge(input);
+    const result = solveChallenge(input, 50);
+    console.log("Result is", result);
   });
 });

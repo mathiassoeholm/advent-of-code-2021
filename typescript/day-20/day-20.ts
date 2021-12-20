@@ -47,6 +47,12 @@ export function solveChallenge(input: string) {
     image = decode(image, decoder);
     printImage(image);
   }
+
+  const litPixels = image
+    .join("")
+    .split("")
+    .filter((c) => c !== ".").length;
+  console.log("lit pixels", litPixels);
 }
 
 export function decode(image: string[], decoder: string[]) {

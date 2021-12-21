@@ -33,9 +33,34 @@ type Game = [
   p2Pos: number,
   p1Score: number,
   p2Score: number,
-  turn: number, // 0..5
-  acc: number
+  turn: number // 0..5
 ];
+
+export const rollDie = (
+  roll: number,
+  [p1Pos, p2Pos, p1Score, p2Score, turn]: Game
+): Game => {
+  const pos = turn <= 2 ? p1Pos : p2Pos;
+  const newPos = ((pos + roll - 1) % 10) + 1;
+
+  if (turn <= 2) {
+    return [
+      newPos,
+      p2Pos,
+      turn === 2 ? p1Score + newPos : p1Score,
+      p2Score,
+      (turn + 1) % 6,
+    ];
+  } else {
+    return [
+      p1Pos,
+      newPos,
+      p1Score,
+      turn === 5 ? p2Score + newPos : p2Score,
+      (turn + 1) % 6,
+    ];
+  }
+};
 
 export function part2(player1StartPos: number, player2StartPos: number) {
   const games = new Map<string, number>();
@@ -44,38 +69,10 @@ export function part2(player1StartPos: number, player2StartPos: number) {
   const decodeGame = (str: string) =>
     str.split(",").map((v) => parseInt(v)) as Game;
 
-  const rollDie = (
-    roll: number,
-    [p1Pos, p2Pos, p1Score, p2Score, turn, acc]: Game
-  ): Game => {
-    const pos = turn <= 2 ? p1Pos : p2Pos;
-    const newPos = ((pos + (roll + acc) - 1) % 10) + 1;
-
-    if (turn <= 2) {
-      return [
-        newPos,
-        p2Pos,
-        turn === 2 ? p1Score + newPos : p1Score,
-        p2Score,
-        (turn + 1) % 6,
-        turn === 2 ? 0 : acc + roll,
-      ];
-    } else {
-      return [
-        p1Pos,
-        p2Pos,
-        p1Score,
-        turn === 5 ? p2Score + newPos : p2Score,
-        (turn + 1) % 6,
-        turn === 5 ? 0 : acc + roll,
-      ];
-    }
-  };
-
-  games.set(encodeGame([player1StartPos, player2StartPos, 0, 0, 0, 0]), 1);
+  games.set(encodeGame([player1StartPos, player2StartPos, 0, 0, 0]), 1);
 
   console.log(
-    games.get(encodeGame([player1StartPos, player2StartPos, 0, 0, 0, 0]))
+    games.get(encodeGame([player1StartPos, player2StartPos, 0, 0, 0]))
   );
 
   let gameStr: string;

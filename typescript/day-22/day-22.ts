@@ -40,3 +40,34 @@ export function isInVolume(
     z <= volume.zMax
   );
 }
+
+export function solvePart1(input: string) {
+  const volumes = input.split("\n").map(parseVolume);
+  const cubes = new Map<string, boolean>();
+
+  for (const volume of volumes) {
+    for (
+      let x = Math.max(volume.xMin, -50);
+      x <= Math.min(volume.xMax, 50);
+      x++
+    ) {
+      for (
+        let y = Math.max(volume.yMin, -50);
+        y <= Math.min(volume.yMax, 50);
+        y++
+      ) {
+        for (
+          let z = Math.max(volume.zMin, -50);
+          z <= Math.min(volume.zMax, 50);
+          z++
+        ) {
+          if (isInVolume([x, y, z], volume)) {
+            cubes.set([x, y, z].join(","), volume.on);
+          }
+        }
+      }
+    }
+  }
+
+  return [...cubes.values()].filter(Boolean).length;
+}

@@ -31,5 +31,12 @@ export function isInVolume(
   [x, y, z]: [number, number, number],
   volume: Volume
 ) {
-  return false;
+  return (
+    x >= volume.xMin &&
+    x <= volume.xMax &&
+    y >= volume.yMin &&
+    y <= volume.yMax &&
+    z >= volume.zMin &&
+    z <= volume.zMax
+  );
 }

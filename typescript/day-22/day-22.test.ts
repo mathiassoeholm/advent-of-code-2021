@@ -15,10 +15,10 @@ describe("day 22", () => {
 
   it("should check if overlaps", () => {
     const volume = parseVolume("on x=-46..7,y=-6..46,z=-50..-1");
-    expect(isInVolume([-50, 0, 0], volume)).toBe(false);
-    expect(isInVolume([-46, 0, 0], volume)).toBe(true);
-    expect(isInVolume([-5, 7, 0], volume)).toBe(true);
-    expect(isInVolume([-5, 7, 2], volume)).toBe(false);
-    expect(isInVolume([-5, 47, 0], volume)).toBe(false);
+    expect(isInVolume([-50, 0, -1], volume)).toBe(false);
+    expect(isInVolume([-46, 0, -1], volume)).toBe(true);
+    expect(isInVolume([-5, 7, -1], volume)).toBe(true);
+    expect(isInVolume([-5, 7, 0], volume)).toBe(false);
+    expect(isInVolume([-5, 47, -1], volume)).toBe(false);
   });
 });

@@ -71,3 +71,7 @@ export function solvePart1(input: string) {
 
   return [...cubes.values()].filter(Boolean).length;
 }
+
+export function solvePart2(input: string) {
+  return 0;
+}

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { isInVolume, parseVolume, solvePart1 } from "./day-22";
+import { isInVolume, parseVolume, solvePart1, solvePart2 } from "./day-22";
 
 describe("day 22", () => {
   it("should parse volume", () => {
@@ -39,5 +39,15 @@ describe("day 22", () => {
 
     const result = solvePart1(input);
     console.log("Result", result);
+  });
+
+  it("can solve part 2 on example input", () => {
+    const input = fs.readFileSync(
+      path.join(__dirname, "example-input-2.txt"),
+      "utf-8"
+    );
+
+    const result = solvePart2(input);
+    expect(result).toBe(2758514936282235);
   });
 });
